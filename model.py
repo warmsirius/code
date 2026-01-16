@@ -30,7 +30,7 @@ class Batch:
         self.sku = sku
         self.eta = eta
         self._purchased_quantity = qty
-        self._allocations = set()  # type: Set[OrderLine]
+        self._allocations = set()  # type: Set[OrderLine] 下划线表示内部使用或私有
 
     def __repr__(self):
         return f"<Batch {self.reference}>"
