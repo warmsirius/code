@@ -29,8 +29,8 @@ allocations = Table(
     "allocations",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("orderline_id", ForeignKey("order_lines.id")),
-    Column("batch_id", ForeignKey("batches.id")),
+    Column("orderline_id", Integer),# 移除ForeignKey
+    Column("batch_id", Integer),# 移除ForeignKey
 )
 
 # 创建全局注册表示例(1个项目创建1个即可)
@@ -39,17 +39,23 @@ mapper_registry = registry()
 
 def start_mappers():
     # 绑定 纯Python类 和 Table对象，实现经典映射
-    # 1. 映射OrderLines，替代原 mapper(model.OrderLine, order_lines)
+    # 1. 映射OrderLines
     lines_mapper = mapper_registry.map_imperatively(model.OrderLine, order_lines)
-    # 2. 映射 Batch，替代原 mapper(...)，里面的 properties 内部逻辑 完全不变！！！
+    # 2. 映射 Batch
     mapper_registry.map_imperatively(
         model.Batch,
         batches,
         properties={
             "_allocations": relationship(
-                lines_mapper, 
+                lines_mapper,
                 secondary=allocations, 
+                
+                primaryjoin=lambda: model.Batch.id == allocations.c.batch_id, 
+                secondaryjoin=lambda: model.OrderLine.id == allocations.c.orderline_id,
+                foreign_keys=[allocations.c.batch_id, allocations.c.orderline_id],
+
                 collection_class=set,  # 这个集合类型保留
+                # backref="batches"  # 如果需要双向关系，可以启用这行
             )
         },
     )
