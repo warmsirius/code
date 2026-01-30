@@ -43,6 +43,15 @@ def test_error_for_invalid_sku():
         services.allocate(line, repo, FakeSession())
 
 
+def test_error_for_out_of_stock():
+    line = model.OrderLine("o1", "SMALL-FORK", 10)
+    batch = model.Batch("b1", "SMALL-FORK", 5, eta=None)
+    repo = FakeRepository([batch])
+
+    with pytest.raises(model.OutOfStock, match="Out of stock for sku SMALL-FORK"):
+        services.allocate(line, repo, FakeSession())
+
+
 def test_commits():
     line = model.OrderLine("o1", "OMINOUS-MIRROR", 10)
     batch = model.Batch("b1", "OMINOUS-MIRROR", 100, eta=None)

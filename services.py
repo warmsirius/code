@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations # 关键：延迟解析类型注解，支持直接写未定义的类型
 
 import model
 from model import OrderLine
