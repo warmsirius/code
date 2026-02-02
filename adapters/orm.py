@@ -1,5 +1,5 @@
 from sqlalchemy import Table, MetaData, Column, Integer, String, Date, ForeignKey
-from sqlalchemy.orm import mapper, relationship
+from sqlalchemy.orm import registry, relationship
 
 from domain import model
 
@@ -34,14 +34,29 @@ allocations = Table(
 )
 
 
+# 创建全局注册表示例(1个项目创建1个即可)
+mapper_registry = registry()
+
+
 def start_mappers():
-    lines_mapper = mapper(model.OrderLine, order_lines)
-    mapper(
+    # 绑定 纯Python类 和 Table对象，实现经典映射
+    # 1. 映射OrderLines
+    lines_mapper = mapper_registry.map_imperatively(model.OrderLine, order_lines)
+    # 2. 映射 Batch
+    mapper_registry.map_imperatively(
         model.Batch,
         batches,
         properties={
             "_allocations": relationship(
-                lines_mapper, secondary=allocations, collection_class=set,
+                lines_mapper,
+                secondary=allocations, 
+                
+                primaryjoin=lambda: model.Batch.id == allocations.c.batch_id, 
+                secondaryjoin=lambda: model.OrderLine.id == allocations.c.orderline_id,
+                foreign_keys=[allocations.c.batch_id, allocations.c.orderline_id],
+
+                collection_class=set,  # 这个集合类型保留
+                # backref="batches"  # 如果需要双向关系，可以启用这行
             )
-        },
+        }
     )
