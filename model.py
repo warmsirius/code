@@ -8,6 +8,10 @@ class OutOfStock(Exception):
     pass
 
 
+class InvalidOrderId(Exception):
+    pass
+
+
 def allocate(line: OrderLine, batches: List[Batch]) -> str:
     try:
         batch = next(b for b in sorted(batches) if b.can_allocate(line))
@@ -19,9 +23,13 @@ def allocate(line: OrderLine, batches: List[Batch]) -> str:
 
 def deallocate(line: OrderLine, batches: List[Batch]) -> str:
     """取消分配"""
-    batch = next(b for b in batches if line in b._allocations)
-    batch.deallocate(line)
-    return batch.reference
+    try:
+        batch = next(b for b in batches if line in b._allocations)
+        batch.deallocate(line)
+        return batch.reference
+    except StopIteration:
+        raise InvalidOrderId(f"Invalid orderid for orderid {line.orderid}")
+
 
 @dataclass(unsafe_hash=True)
 class OrderLine:
