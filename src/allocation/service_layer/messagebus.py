@@ -1,4 +1,5 @@
-from typing import List, Dict, Callable, Type
+from typing import Callable
+
 from allocation.adapters import email
 from allocation.domain import events
 
@@ -17,4 +18,4 @@ def send_out_of_stock_notification(event: events.OutOfStock):
 
 HANDLERS = {
     events.OutOfStock: [send_out_of_stock_notification],
-}  # type: Dict[Type[events.Event], List[Callable]]
+}  # type: dict[type[events.Event], list[Callable]]

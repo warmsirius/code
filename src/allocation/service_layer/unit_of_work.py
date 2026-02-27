@@ -1,14 +1,15 @@
 # pylint: disable=attribute-defined-outside-init
 from __future__ import annotations
+
 import abc
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 
-
+from . import messagebus
 from allocation import config
 from allocation.adapters import repository
-from . import messagebus
 
 
 class AbstractUnitOfWork(abc.ABC):
